@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Runner Game</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        window.onload = function () {
+            const canvas = document.getElementById("gameCanvas");
+            if (!canvas) {
+                console.error("Canvas not found!");
+                return;
+            }
+            const ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let spaceship = { x: 50, y: canvas.height / 2, width: 50, height: 30, dy: 0 };
+            let asteroids = [];
+            let gravity = 0.5;
+            let gameActive = true;
+
+            function drawSpaceship() {
+                ctx.fillStyle = "white";
+                ctx.fillRect(spaceship.x, spaceship.y, spaceship.width, spaceship.height);
+            }
+
+            function drawAsteroids() {
+                ctx.fillStyle = "red";
+                asteroids.forEach(asteroid => {
+                    ctx.fillRect(asteroid.x, asteroid.y, asteroid.size, asteroid.size);
+                });
+            }
+
+            function update() {
+                if (!gameActive) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                spaceship.y += spaceship.dy;
+                spaceship.dy += gravity;
+                
+                if (spaceship.y + spaceship.height > canvas.height) spaceship.y = canvas.height - spaceship.height;
+                
+                asteroids.forEach(asteroid => {
+                    asteroid.x -= 5;
+                });
+                asteroids = asteroids.filter(asteroid => asteroid.x > 0);
+                
+                if (Math.random() < 0.02) {
+                    asteroids.push({ x: canvas.width, y: Math.random() * canvas.height, size: 30 });
+                }
+                
+                asteroids.forEach(asteroid => {
+                    if (spaceship.x < asteroid.x + asteroid.size &&
+                        spaceship.x + spaceship.width > asteroid.x &&
+                        spaceship.y < asteroid.y + asteroid.size &&
+                        spaceship.y + spaceship.height > asteroid.y) {
+                        gameActive = false;
+                        alert("Game Over! Refresh to play again.");
+                    }
+                });
+
+                drawSpaceship();
+                drawAsteroids();
+                requestAnimationFrame(update);
+            }
+
+            window.addEventListener("keydown", () => {
+                spaceship.dy = -10;
+            });
+
+            update();
+        };
+    </script>
+</body>
+</html>
